@@ -25,14 +25,19 @@ app.get("/api/requests", (_req: Request, res: Response) => {
 });
 
 app.post("/api/requests", (req: Request, res: Response) => {
-  const { name, role, category, title, description, urgency } = req.body ?? {};
-  if (!name || !role || !category || !title || !description || !urgency) {
+  const { name, email, role, category, title, description, urgency } = req.body ?? {};
+  if (!name || !email || !role || !category || !title || !description || !urgency) {
     return res.status(400).json({ error: "Missing required fields." });
+  }
+  const normalizedEmail = String(email).toLowerCase().trim();
+  if (!normalizedEmail.endsWith("@virginia.edu")) {
+    return res.status(400).json({ error: "Email must end with @virginia.edu." });
   }
 
   const newRequest: FundingRequest = {
     id: crypto.randomUUID(),
     name,
+    email: normalizedEmail,
     role,
     category,
     title,
