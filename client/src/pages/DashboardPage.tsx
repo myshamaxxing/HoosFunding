@@ -25,6 +25,19 @@ const categoryColors: Record<RequestCategory, string> = {
   Other: "#64748b",
 };
 
+function InfoHint({ text, label }: { text: string; label: string }) {
+  return (
+    <span
+      className="cursor-help text-base text-slate-400"
+      title={text}
+      role="img"
+      aria-label={`${label} info`}
+    >
+      ⓘ
+    </span>
+  );
+}
+
 export function DashboardPage() {
   const [requests, setRequests] = useState<FundingRequest[]>([]);
   const [department, setDepartment] = useState<DepartmentSummary | null>(null);
@@ -94,37 +107,56 @@ export function DashboardPage() {
       )}
 
       {department && (
-        <div className="grid gap-4 rounded-2xl bg-white p-6 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <p className="text-xs uppercase text-slate-500">Department</p>
+        <div className="grid gap-4 rounded-2xl bg-white p-6 shadow-sm sm:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <p className="text-xs uppercase text-slate-500">Department</p>
+              <InfoHint label="Department" text="Overview of the department whose requests you are reviewing." />
+            </div>
             <p className="text-lg font-semibold text-slate-900">{department.departmentName}</p>
           </div>
-          <div>
-            <p className="text-xs uppercase text-slate-500">Avg Resources Rating</p>
-            <p className="text-lg font-semibold text-slate-900">{department.avgResourcesRating.toFixed(1)} / 5</p>
-          </div>
-          <div>
-            <p className="text-xs uppercase text-slate-500">Avg Teaching Rating</p>
-            <p className="text-lg font-semibold text-slate-900">{department.avgTeachingRating.toFixed(1)} / 5</p>
-          </div>
-          <div>
-            <p className="text-xs uppercase text-slate-500">Top Themes</p>
-            <ul className="mt-1 space-y-1 text-sm text-slate-700">
-              {department.topThemes.slice(0, 2).map((theme) => (
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <p className="text-xs uppercase text-slate-500">Top Themes</p>
+              <InfoHint
+                label="Top themes"
+                text="Recurring needs surfaced in recent course evaluations."
+              />
+            </div>
+            <ul className="space-y-1 text-sm text-slate-700">
+              {department.topThemes.slice(0, 3).map((theme) => (
                 <li key={theme.theme}>
                   {theme.theme} <span className="text-slate-400">({theme.count})</span>
                 </li>
               ))}
             </ul>
           </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <p className="text-xs uppercase text-slate-500">Student Voice</p>
+              <InfoHint
+                label="Student voice"
+                text="Recent comment excerpts to give context to the requests."
+              />
+            </div>
+            <p className="text-sm text-slate-600">
+              “{department.sampleComments[0]}”
+            </p>
+          </div>
         </div>
       )}
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900">Requests In Review</h3>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-slate-900">View Pending Requests</h3>
+                <InfoHint
+                  label="Pending requests"
+                  text="Shows every open request awaiting review. Use filters to focus on a category."
+                />
+              </div>
               <p className="text-xs text-slate-500">Filter to focus on specific request types.</p>
             </div>
             <select
@@ -168,7 +200,13 @@ export function DashboardPage() {
 
         <div className="space-y-6">
           <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-slate-900">Requests by Category</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-slate-900">Requests by Category</h3>
+              <InfoHint
+                label="Requests by category"
+                text="Quick snapshot of how many requests fall into each funding category."
+              />
+            </div>
             {chartData.length === 0 ? (
               <p className="mt-6 rounded-lg border border-dashed border-slate-200 px-4 py-6 text-center text-sm text-slate-500">
                 No requests yet.
@@ -192,8 +230,14 @@ export function DashboardPage() {
 
           <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between gap-4">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900">AI Recommendations</h3>
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-semibold text-slate-900">AI Recommendations</h3>
+                  <InfoHint
+                    label="AI recommendations"
+                    text="Summarizes the top funding priorities suggested by the AI model."
+                  />
+                </div>
                 <p className="text-xs text-slate-500">Combines department summary + pending requests.</p>
               </div>
               <button
@@ -209,45 +253,88 @@ export function DashboardPage() {
               <p className="text-sm text-slate-500">Generating insights...</p>
             ) : recommendations ? (
               <div className="space-y-4">
-                <div>
-                  <p className="text-xs uppercase text-slate-500">Top Priorities</p>
-                  <ul className="mt-2 space-y-3">
-                    {recommendations.recommendations.map((item) => (
-                      <li key={item.priority} className="rounded-xl border border-slate-100 p-3 shadow-sm">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-semibold text-slate-900">{item.priority}</p>
-                          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                            {item.category}
-                          </span>
-                        </div>
-                        <p className="mt-1 text-sm text-slate-600">{item.rationale}</p>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <p className="text-xs uppercase text-slate-500">Ranked Requests</p>
-                  <ul className="mt-2 space-y-2">
-                    {recommendations.rankedRequests.slice(0, 3).map((item) => {
+                <ul className="space-y-3">
+                  {recommendations.recommendations.map((item) => (
+                    <li key={item.priority} className="rounded-xl border border-slate-100 p-3 shadow-sm">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold text-slate-900">{item.priority}</p>
+                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                          {item.category}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-sm text-slate-600">{item.rationale}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p className="text-sm text-slate-500">No recommendations yet.</p>
+            )}
+          </div>
+
+          <div className="rounded-2xl bg-white p-6 shadow-sm">
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-slate-900">AI Ranking</h3>
+              <InfoHint
+                label="AI ranking"
+                text="Requests ordered by how strongly they align with current department needs."
+              />
+            </div>
+            {recommendations ? (
+              <ul className="mt-3 space-y-2">
+                {recommendations.rankedRequests.slice(0, 4).map((item) => {
+                  const request = requests.find((req) => req.id === item.id);
+                  return (
+                    <li key={item.id} className="rounded-lg border border-slate-100 p-3 text-sm text-slate-600">
+                      <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
+                        <span>Rank #{item.priorityRank}</span>
+                        <span>Alignment {item.alignmentScore}</span>
+                      </div>
+                      <p className="mt-1 text-sm font-medium text-slate-900">
+                        {request?.title ?? "Request"}
+                      </p>
+                      <p className="text-xs text-slate-500">{item.reasoning}</p>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="mt-4 text-sm text-slate-500">Ranking will appear once recommendations load.</p>
+            )}
+          </div>
+
+          <div className="rounded-2xl bg-white p-6 shadow-sm">
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-slate-900">Top AI-Flagged Requests</h3>
+              <InfoHint
+                label="Top AI-flagged"
+                text="Highest-priority individual requests surfaced by the AI (alignment score ≥ 80)."
+              />
+            </div>
+            {recommendations ? (
+              (() => {
+                const topFlagged =
+                  recommendations.rankedRequests.filter((req) => req.alignmentScore >= 80).slice(0, 3) ||
+                  [];
+                const fallback = topFlagged.length > 0 ? topFlagged : recommendations.rankedRequests.slice(0, 3);
+                return (
+                  <ul className="mt-3 space-y-3">
+                    {fallback.map((item) => {
                       const request = requests.find((req) => req.id === item.id);
                       return (
-                        <li key={item.id} className="rounded-lg border border-slate-100 p-3 text-sm text-slate-600">
-                          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-                            <span>Rank #{item.priorityRank}</span>
-                            <span>Alignment {item.alignmentScore}</span>
-                          </div>
-                          <p className="mt-1 text-sm font-medium text-slate-900">
-                            {request?.title ?? "Request"}
+                        <li key={item.id} className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+                          <p className="text-sm font-semibold text-primary">
+                            {request?.title ?? "Request"} (Score {item.alignmentScore})
                           </p>
-                          <p className="text-xs text-slate-500">{item.reasoning}</p>
+                          <p className="text-xs text-slate-600">{item.reasoning}</p>
                         </li>
                       );
                     })}
                   </ul>
-                </div>
-              </div>
+                );
+              })()
             ) : (
-              <p className="text-sm text-slate-500">No recommendations yet.</p>
+              <p className="mt-4 text-sm text-slate-500">AI needs a moment to flag high-priority requests.</p>
             )}
           </div>
         </div>
