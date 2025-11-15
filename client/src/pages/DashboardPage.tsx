@@ -120,12 +120,12 @@ export function DashboardPage() {
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm lg:col-span-1">
+      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+        <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-slate-900">Pending Requests</h3>
-              <p className="text-xs text-slate-500">Filter by category to narrow focus.</p>
+              <h3 className="text-lg font-semibold text-slate-900">Requests In Review</h3>
+              <p className="text-xs text-slate-500">Filter to focus on specific request types.</p>
             </div>
             <select
               className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm"
@@ -139,7 +139,7 @@ export function DashboardPage() {
               ))}
             </select>
           </div>
-          <div className="space-y-3 max-h-[28rem] overflow-auto pr-1">
+          <div className="space-y-3 max-h-[36rem] overflow-auto pr-1">
             {filteredRequests.length === 0 ? (
               <p className="rounded-lg border border-dashed border-slate-200 px-4 py-6 text-center text-sm text-slate-500">
                 No requests match this filter yet.
@@ -166,88 +166,90 @@ export function DashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl bg-white p-6 shadow-sm lg:col-span-1">
-          <h3 className="text-lg font-semibold text-slate-900">Requests by Category</h3>
-          {chartData.length === 0 ? (
-            <p className="mt-6 rounded-lg border border-dashed border-slate-200 px-4 py-6 text-center text-sm text-slate-500">
-              No requests yet.
-            </p>
-          ) : (
-            <div className="mt-4 h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie dataKey="value" data={chartData} innerRadius={50} outerRadius={80} paddingAngle={4}>
-                    {chartData.map((entry) => (
-                      <Cell key={entry.name} fill={categoryColors[entry.name as RequestCategory]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm lg:col-span-1">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900">AI Recommendations</h3>
-              <p className="text-xs text-slate-500">Combines department summary + pending requests.</p>
-            </div>
-            <button
-              type="button"
-              onClick={generateRecommendations}
-              className="rounded-full border border-primary bg-white px-3 py-1 text-xs font-semibold text-primary hover:bg-primary hover:text-white"
-            >
-              Refresh
-            </button>
+        <div className="space-y-6">
+          <div className="rounded-2xl bg-white p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-slate-900">Requests by Category</h3>
+            {chartData.length === 0 ? (
+              <p className="mt-6 rounded-lg border border-dashed border-slate-200 px-4 py-6 text-center text-sm text-slate-500">
+                No requests yet.
+              </p>
+            ) : (
+              <div className="mt-4 h-60 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie dataKey="value" data={chartData} innerRadius={50} outerRadius={80} paddingAngle={4}>
+                      {chartData.map((entry) => (
+                        <Cell key={entry.name} fill={categoryColors[entry.name as RequestCategory]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </div>
 
-          {loadingRecommendations ? (
-            <p className="text-sm text-slate-500">Generating insights...</p>
-          ) : recommendations ? (
-            <div className="space-y-4">
+          <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-xs uppercase text-slate-500">Top Priorities</p>
-                <ul className="mt-2 space-y-3">
-                  {recommendations.recommendations.map((item) => (
-                    <li key={item.priority} className="rounded-xl border border-slate-100 p-3 shadow-sm">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-semibold text-slate-900">{item.priority}</p>
-                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                          {item.category}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-sm text-slate-600">{item.rationale}</p>
-                    </li>
-                  ))}
-                </ul>
+                <h3 className="text-lg font-semibold text-slate-900">AI Recommendations</h3>
+                <p className="text-xs text-slate-500">Combines department summary + pending requests.</p>
               </div>
-              <div>
-                <p className="text-xs uppercase text-slate-500">Ranked Requests</p>
-                <ul className="mt-2 space-y-2">
-                  {recommendations.rankedRequests.slice(0, 3).map((item) => {
-                    const request = requests.find((req) => req.id === item.id);
-                    return (
-                      <li key={item.id} className="rounded-lg border border-slate-100 p-3 text-sm text-slate-600">
-                        <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-                          <span>Rank #{item.priorityRank}</span>
-                          <span>Alignment {item.alignmentScore}</span>
-                        </div>
-                        <p className="mt-1 text-sm font-medium text-slate-900">
-                          {request?.title ?? "Request"}
-                        </p>
-                        <p className="text-xs text-slate-500">{item.reasoning}</p>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
+              <button
+                type="button"
+                onClick={generateRecommendations}
+                className="rounded-full border border-primary bg-white px-3 py-1 text-xs font-semibold text-primary hover:bg-primary hover:text-white"
+              >
+                Refresh
+              </button>
             </div>
-          ) : (
-            <p className="text-sm text-slate-500">No recommendations yet.</p>
-          )}
+
+            {loadingRecommendations ? (
+              <p className="text-sm text-slate-500">Generating insights...</p>
+            ) : recommendations ? (
+              <div className="space-y-4">
+                <div>
+                  <p className="text-xs uppercase text-slate-500">Top Priorities</p>
+                  <ul className="mt-2 space-y-3">
+                    {recommendations.recommendations.map((item) => (
+                      <li key={item.priority} className="rounded-xl border border-slate-100 p-3 shadow-sm">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-semibold text-slate-900">{item.priority}</p>
+                          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                            {item.category}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-sm text-slate-600">{item.rationale}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <p className="text-xs uppercase text-slate-500">Ranked Requests</p>
+                  <ul className="mt-2 space-y-2">
+                    {recommendations.rankedRequests.slice(0, 3).map((item) => {
+                      const request = requests.find((req) => req.id === item.id);
+                      return (
+                        <li key={item.id} className="rounded-lg border border-slate-100 p-3 text-sm text-slate-600">
+                          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
+                            <span>Rank #{item.priorityRank}</span>
+                            <span>Alignment {item.alignmentScore}</span>
+                          </div>
+                          <p className="mt-1 text-sm font-medium text-slate-900">
+                            {request?.title ?? "Request"}
+                          </p>
+                          <p className="text-xs text-slate-500">{item.reasoning}</p>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-slate-500">No recommendations yet.</p>
+            )}
+          </div>
         </div>
       </div>
     </section>
