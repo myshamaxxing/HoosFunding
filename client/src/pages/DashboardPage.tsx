@@ -127,46 +127,6 @@ export function DashboardPage() {
         </div>
       )}
 
-      {department && (
-        <div className="grid gap-4 rounded-2xl bg-white p-6 shadow-sm sm:grid-cols-2 lg:grid-cols-3">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <p className="text-xs uppercase text-slate-500">Department</p>
-              <InfoHint label="Department" text="Overview of the department whose requests you are reviewing." />
-            </div>
-            <p className="text-lg font-semibold text-slate-900">{department.departmentName}</p>
-          </div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <p className="text-xs uppercase text-slate-500">Top Themes</p>
-              <InfoHint
-                label="Top themes"
-                text="Recurring needs surfaced in recent course evaluations."
-              />
-            </div>
-            <ul className="space-y-1 text-sm text-slate-700">
-              {department.topThemes.slice(0, 3).map((theme) => (
-                <li key={theme.theme}>
-                  {theme.theme} <span className="text-slate-400">({theme.count})</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <p className="text-xs uppercase text-slate-500">Student Voice</p>
-              <InfoHint
-                label="Student voice"
-                text="Recent comment excerpts to give context to the requests."
-              />
-            </div>
-            <p className="text-sm text-slate-600">
-              “{department.sampleComments[0]}”
-            </p>
-          </div>
-        </div>
-      )}
-
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between gap-4">
