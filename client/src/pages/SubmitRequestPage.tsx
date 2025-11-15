@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { createRequest, precheckRequest } from "../api";
 import type { FundingRequest, NewFundingRequest, RequestCategory, UserRole } from "../types";
@@ -21,7 +21,7 @@ const defaultForm: NewFundingRequest = {
   name: "",
   email: "",
   role: "Student",
-  category: "Tech",
+  category: "Professional Development & Training",
   title: "",
   description: "",
   urgency: "Medium",
