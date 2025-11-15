@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Header, type Tab } from "./components/Header";
 import { DashboardPage } from "./pages/DashboardPage";
 import { RequesteeDashboardPage } from "./pages/RequesteeDashboardPage";
+import { StatisticsPage } from "./pages/StatisticsPage";
 import { SubmitRequestPage } from "./pages/SubmitRequestPage";
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
       <main>
         {activeTab === "admin" && <DashboardPage />}
         {activeTab === "requestee" && <RequesteeDashboardPage />}
+        {activeTab === "stats" && <StatisticsPage />}
         {activeTab === "submit" && <SubmitRequestPage />}
       </main>
     </div>

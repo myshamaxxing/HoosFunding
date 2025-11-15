@@ -1,6 +1,6 @@
 import type { FC } from "react";
 
-type Tab = "admin" | "requestee" | "submit";
+type Tab = "admin" | "requestee" | "stats" | "submit";
 
 interface HeaderProps {
   activeTab: Tab;
@@ -10,6 +10,7 @@ interface HeaderProps {
 const tabs: { label: string; value: Tab }[] = [
   { label: "Admin Dashboard", value: "admin" },
   { label: "Requestee Dashboard", value: "requestee" },
+  { label: "Request Statistics", value: "stats" },
   { label: "Submit Request", value: "submit" },
 ];
 

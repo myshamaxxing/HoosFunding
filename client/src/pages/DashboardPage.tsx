@@ -1,50 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { Pie, PieChart, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
-import { fetchPolicyInsights, fetchRecommendations, fetchRequests } from "../api";
-import type {
-  FundingRequest,
-  RecommendationResponse,
-  RequestCategory,
-  PolicyInsightSummary,
-} from "../types";
-
-const categoryFilters: (RequestCategory | "All")[] = [
-  "All",
-  "Professional Development & Training",
-  "Conference Travel & Presentations",
-  "Teaching Materials, Software, & Subscriptions",
-  "Classroom & Instructional Technology",
-  "TA / Grader / Student Worker Support",
-  "Student Experience, Events, & Programming",
-  "Space, Furniture, & Facility Improvements",
-  "Research & Lab Equipment (mixed with teaching)",
-  "Other",
-];
-
-const categoryColors: Record<RequestCategory, string> = {
-  "Professional Development & Training": "#2563eb",
-  "Conference Travel & Presentations": "#f97316",
-  "Teaching Materials, Software, & Subscriptions": "#10b981",
-  "Classroom & Instructional Technology": "#a855f7",
-  "TA / Grader / Student Worker Support": "#ec4899",
-  "Student Experience, Events, & Programming": "#14b8a6",
-  "Space, Furniture, & Facility Improvements": "#fbbf24",
-  "Research & Lab Equipment (mixed with teaching)": "#8b5cf6",
-  Other: "#64748b",
-};
-
-function InfoHint({ text, label }: { text: string; label: string }) {
-  return (
-    <span
-      className="cursor-help text-base text-slate-400"
-      title={text}
-      role="img"
-      aria-label={`${label} info`}
-    >
-      ⓘ
-    </span>
-  );
-}
+import { fetchRecommendations, fetchRequests } from "../api";
+import type { FundingRequest, RecommendationResponse, RequestCategory } from "../types";
+import { categoryFilters } from "../constants/categoryMetadata";
+import { InfoHint } from "../components/InfoHint";
 
 function extractPolicyCode(note: string): string | undefined {
   const match = note.match(/\[(?<code>FIN-\d+|EXT-\d+|Budget[^\]]+)\]/);
@@ -55,7 +13,6 @@ export function DashboardPage() {
   const [requests, setRequests] = useState<FundingRequest[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<RequestCategory | "All">("All");
   const [recommendations, setRecommendations] = useState<RecommendationResponse | null>(null);
-  const [policyInsights, setPolicyInsights] = useState<PolicyInsightSummary | null>(null);
   const [loadingRecommendations, setLoadingRecommendations] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,9 +20,8 @@ export function DashboardPage() {
     async function bootstrap() {
       try {
         setError(null);
-        const [requestData, insights] = await Promise.all([fetchRequests(), fetchPolicyInsights()]);
+        const requestData = await fetchRequests();
         setRequests(requestData);
-        setPolicyInsights(insights);
         await generateRecommendations();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load data.");
@@ -79,26 +35,6 @@ export function DashboardPage() {
       (request) => request.status === "Pending" && (categoryFilter === "All" || request.category === categoryFilter),
     );
   }, [requests, categoryFilter]);
-
-  const chartData = useMemo(() => {
-    const counts: Record<RequestCategory, number> = {
-      "Professional Development & Training": 0,
-      "Conference Travel & Presentations": 0,
-      "Teaching Materials, Software, & Subscriptions": 0,
-      "Classroom & Instructional Technology": 0,
-      "TA / Grader / Student Worker Support": 0,
-      "Student Experience, Events, & Programming": 0,
-      "Space, Furniture, & Facility Improvements": 0,
-      "Research & Lab Equipment (mixed with teaching)": 0,
-      Other: 0,
-    };
-    requests.forEach((request) => {
-      counts[request.category] += 1;
-    });
-    return Object.entries(counts)
-      .filter(([, count]) => count > 0)
-      .map(([category, count]) => ({ name: category, value: count }));
-  }, [requests]);
 
   async function generateRecommendations() {
     try {
@@ -218,35 +154,6 @@ export function DashboardPage() {
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold text-slate-900">Requests by Category</h3>
-              <InfoHint
-                label="Requests by category"
-                text="Quick snapshot of how many requests fall into each funding category."
-              />
-            </div>
-            {chartData.length === 0 ? (
-              <p className="mt-6 rounded-lg border border-dashed border-slate-200 px-4 py-6 text-center text-sm text-slate-500">
-                No requests yet.
-              </p>
-            ) : (
-              <div className="mt-4 h-60 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie dataKey="value" data={chartData} innerRadius={50} outerRadius={80} paddingAngle={4}>
-                      {chartData.map((entry) => (
-                        <Cell key={entry.name} fill={categoryColors[entry.name as RequestCategory]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </div>
-
           <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between gap-4">
               <div className="flex flex-col gap-1">
@@ -356,65 +263,6 @@ export function DashboardPage() {
               <p className="mt-4 text-sm text-slate-500">AI needs a moment to flag high-priority requests.</p>
             )}
           </div>
-
-          {recommendations?.policyGreyAreas.length ? (
-            <div className="rounded-2xl bg-white p-6 shadow-sm">
-              <div className="flex items-center gap-2">
-                <h3 className="text-lg font-semibold text-slate-900">Policy Grey Areas</h3>
-                <InfoHint
-                  label="Policy grey areas"
-                  text="AI highlights categories where approvals/denials are inconsistent and may need policy clarification."
-                />
-              </div>
-              <ul className="mt-3 space-y-3 text-sm text-slate-600">
-                {recommendations.policyGreyAreas.map((area) => (
-                  <li key={area.category} className="rounded-lg border border-slate-100 p-3">
-                    <p className="text-sm font-semibold text-slate-900">{area.category}</p>
-                    <p className="text-xs text-slate-500">{area.summary}</p>
-                    <p className="mt-1 text-xs text-slate-500">{area.suggestion}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-
-          {policyInsights && (
-            <div className="rounded-2xl bg-white p-6 shadow-sm">
-              <div className="flex items-center gap-2">
-                <h3 className="text-lg font-semibold text-slate-900">Category Approval Trends</h3>
-                <InfoHint
-                  label="Category approval trends"
-                  text="Historical approvals vs denials help reviewers calibrate decisions by category."
-                />
-              </div>
-              <div className="mt-4 overflow-x-auto">
-                <table className="w-full text-left text-sm text-slate-600">
-                  <thead>
-                    <tr className="text-xs uppercase text-slate-500">
-                      <th className="py-2">Category</th>
-                      <th className="py-2">Approvals</th>
-                      <th className="py-2">Denials</th>
-                      <th className="py-2">Approval Rate</th>
-                      <th className="py-2">Top Denial Reasons</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {policyInsights.categories.map((cat) => (
-                      <tr key={cat.category} className="border-t border-slate-100">
-                        <td className="py-2 font-medium text-slate-900">{cat.category}</td>
-                        <td className="py-2">{cat.approvals}</td>
-                        <td className="py-2">{cat.denials}</td>
-                        <td className="py-2">{Math.round(cat.approvalRate * 100)}%</td>
-                        <td className="py-2 text-xs text-slate-500">
-                          {cat.topReasons.length ? cat.topReasons.join("; ") : "—"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </section>
