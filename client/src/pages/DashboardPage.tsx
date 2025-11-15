@@ -10,18 +10,26 @@ import type {
 
 const categoryFilters: (RequestCategory | "All")[] = [
   "All",
-  "Tech",
-  "Staffing",
-  "Facilities",
-  "Training",
+  "Professional Development & Training",
+  "Conference Travel & Presentations",
+  "Teaching Materials, Software, & Subscriptions",
+  "Classroom & Instructional Technology",
+  "TA / Grader / Student Worker Support",
+  "Student Experience, Events, & Programming",
+  "Space, Furniture, & Facility Improvements",
+  "Research & Lab Equipment (mixed with teaching)",
   "Other",
 ];
 
 const categoryColors: Record<RequestCategory, string> = {
-  Tech: "#2563eb",
-  Staffing: "#f97316",
-  Facilities: "#10b981",
-  Training: "#a855f7",
+  "Professional Development & Training": "#2563eb",
+  "Conference Travel & Presentations": "#f97316",
+  "Teaching Materials, Software, & Subscriptions": "#10b981",
+  "Classroom & Instructional Technology": "#a855f7",
+  "TA / Grader / Student Worker Support": "#ec4899",
+  "Student Experience, Events, & Programming": "#14b8a6",
+  "Space, Furniture, & Facility Improvements": "#fbbf24",
+  "Research & Lab Equipment (mixed with teaching)": "#8b5cf6",
   Other: "#64748b",
 };
 
@@ -72,10 +80,14 @@ export function DashboardPage() {
 
   const chartData = useMemo(() => {
     const counts: Record<RequestCategory, number> = {
-      Tech: 0,
-      Staffing: 0,
-      Facilities: 0,
-      Training: 0,
+      "Professional Development & Training": 0,
+      "Conference Travel & Presentations": 0,
+      "Teaching Materials, Software, & Subscriptions": 0,
+      "Classroom & Instructional Technology": 0,
+      "TA / Grader / Student Worker Support": 0,
+      "Student Experience, Events, & Programming": 0,
+      "Space, Furniture, & Facility Improvements": 0,
+      "Research & Lab Equipment (mixed with teaching)": 0,
       Other: 0,
     };
     requests.forEach((request) => {
@@ -97,6 +109,15 @@ export function DashboardPage() {
       setLoadingRecommendations(false);
     }
   }
+
+  const rankedHintsById = useMemo(() => {
+    if (!recommendations) return {};
+    const map: Record<string, string | undefined> = {};
+    recommendations.rankedRequests.forEach((ranked) => {
+      map[ranked.id] = ranked.pastDenialHint;
+    });
+    return map;
+  }, [recommendations]);
 
   return (
     <section className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
@@ -192,6 +213,11 @@ export function DashboardPage() {
                     {request.role} • Urgency: <span className="font-medium text-slate-700">{request.urgency}</span>
                   </p>
                   <p className="mt-2 text-sm text-slate-600">{request.description}</p>
+                  {rankedHintsById[request.id] && (
+                    <p className="mt-3 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                      <span className="font-semibold">AI Policy Insight:</span> {rankedHintsById[request.id]}
+                    </p>
+                  )}
                 </article>
               ))
             )}

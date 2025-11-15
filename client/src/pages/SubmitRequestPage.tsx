@@ -1,10 +1,20 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { createRequest } from "../api";
+import { createRequest, precheckRequest } from "../api";
 import type { FundingRequest, NewFundingRequest, RequestCategory, UserRole } from "../types";
 
 const roleOptions: UserRole[] = ["Student", "Professor", "Staff", "Other"];
-const categoryOptions: RequestCategory[] = ["Tech", "Staffing", "Facilities", "Training", "Other"];
+const categoryOptions: RequestCategory[] = [
+  "Professional Development & Training",
+  "Conference Travel & Presentations",
+  "Teaching Materials, Software, & Subscriptions",
+  "Classroom & Instructional Technology",
+  "TA / Grader / Student Worker Support",
+  "Student Experience, Events, & Programming",
+  "Space, Furniture, & Facility Improvements",
+  "Research & Lab Equipment (mixed with teaching)",
+  "Other",
+];
 const urgencyOptions: Array<NewFundingRequest["urgency"]> = ["Low", "Medium", "High"];
 
 const defaultForm: NewFundingRequest = {
@@ -22,6 +32,8 @@ export function SubmitRequestPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [recent, setRecent] = useState<FundingRequest[]>([]);
+  const [precheck, setPrecheck] = useState<string | null>(null);
+  const [isPrechecking, setIsPrechecking] = useState(false);
 
   const handleChange = (field: keyof NewFundingRequest, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -41,6 +53,7 @@ export function SubmitRequestPage() {
       const created = await createRequest(form);
       setRecent((prev) => [created, ...prev].slice(0, 3));
       setForm(defaultForm);
+      setPrecheck(null);
       setMessage("Request submitted successfully! The admin team will review it soon.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Failed to submit request.");
@@ -51,6 +64,33 @@ export function SubmitRequestPage() {
 
   const inputClass =
     "w-full rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30";
+
+  const shouldRunPrecheck = form.description.trim().length >= 20 && form.category;
+
+  async function handlePrecheck() {
+    if (!shouldRunPrecheck) {
+      setPrecheck(null);
+      return;
+    }
+    setIsPrechecking(true);
+    try {
+      const result = await precheckRequest({
+        category: form.category,
+        description: form.description,
+      });
+      setPrecheck(result.preCheckMessage);
+    } catch (error) {
+      console.error(error);
+      setPrecheck(null);
+    } finally {
+      setIsPrechecking(false);
+    }
+  }
+
+  useEffect(() => {
+    void handlePrecheck();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.category, form.description]);
 
   return (
     <section className="mx-auto max-w-3xl space-y-8 px-6 py-10">
@@ -150,6 +190,13 @@ export function SubmitRequestPage() {
             onChange={(event) => handleChange("description", event.target.value)}
             required
           />
+          {shouldRunPrecheck && (
+            <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+              {isPrechecking
+                ? "Analyzing similar requests..."
+                : precheck ?? "Gathering policy insight..."}
+            </p>
+          )}
         </label>
 
         <button

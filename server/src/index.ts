@@ -7,6 +7,7 @@ import { getFundingRecommendations } from "./aiService";
 import { departmentSummary } from "./departmentSummary";
 import { fundingRequests } from "./store";
 import type { FundingRequest } from "./types";
+import { buildPreCheckMessage, getCommonDenialMessagesForCategory } from "./policyCategories";
 
 dotenv.config();
 
@@ -59,6 +60,31 @@ app.post("/api/recommend", async (_req: Request, res: Response) => {
     console.error("Failed to generate recommendations", error);
     res.status(500).json({ error: "Failed to generate recommendations." });
   }
+});
+
+app.post("/api/precheck-request", (req: Request, res: Response) => {
+  const { category, description } = req.body ?? {};
+  if (!category || !description) {
+    return res.status(400).json({ error: "Category and description are required." });
+  }
+  const reasons = getCommonDenialMessagesForCategory(category);
+  let message = buildPreCheckMessage(category);
+  const normalizedDescription = String(description).toLowerCase();
+  if (
+    category === "Teaching Materials, Software, & Subscriptions" &&
+    normalizedDescription.includes("subscription")
+  ) {
+    message =
+      "⚠️ Reviewers often deny software subscriptions unless tied to a specific course with per-student licensing. Highlight how the subscription supports a class.";
+  }
+  if (category === "Conference Travel & Presentations" && normalizedDescription.includes("last minute")) {
+    message =
+      "⚠️ Travel funding frequently gets denied when submitted less than 30 days in advance. Add justification or confirm dates if possible.";
+  }
+  res.json({
+    preCheckMessage: message,
+    commonDenialReasons: reasons,
+  });
 });
 
 app.use((_req, res) => {

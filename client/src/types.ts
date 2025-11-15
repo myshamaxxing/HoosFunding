@@ -1,4 +1,13 @@
-export type RequestCategory = "Tech" | "Staffing" | "Facilities" | "Training" | "Other";
+export type RequestCategory =
+  | "Professional Development & Training"
+  | "Conference Travel & Presentations"
+  | "Teaching Materials, Software, & Subscriptions"
+  | "Classroom & Instructional Technology"
+  | "TA / Grader / Student Worker Support"
+  | "Student Experience, Events, & Programming"
+  | "Space, Furniture, & Facility Improvements"
+  | "Research & Lab Equipment (mixed with teaching)"
+  | "Other";
 
 export type UserRole = "Student" | "Professor" | "Staff" | "Other";
 
