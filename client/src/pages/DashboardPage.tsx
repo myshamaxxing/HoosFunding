@@ -325,64 +325,6 @@ export function DashboardPage() {
           <div className="rounded-2xl bg-white p-6 shadow-sm">
             <div className="flex items-center gap-2">
               <h3 className="text-lg font-semibold text-slate-900">Top AI-Flagged Requests</h3>
-        {recommendations?.policyGreyAreas.length ? (
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold text-slate-900">Policy Grey Areas</h3>
-              <InfoHint
-                label="Policy grey areas"
-                text="AI highlights categories where approvals/denials are inconsistent and may need policy clarification."
-              />
-            </div>
-            <ul className="mt-3 space-y-3 text-sm text-slate-600">
-              {recommendations.policyGreyAreas.map((area) => (
-                <li key={area.category} className="rounded-lg border border-slate-100 p-3">
-                  <p className="text-sm font-semibold text-slate-900">{area.category}</p>
-                  <p className="text-xs text-slate-500">{area.summary}</p>
-                  <p className="mt-1 text-xs text-slate-500">{area.suggestion}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-
-        {policyInsights && (
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold text-slate-900">Category Approval Trends</h3>
-              <InfoHint
-                label="Category approval trends"
-                text="Historical approvals vs denials help reviewers calibrate decisions by category."
-              />
-            </div>
-            <div className="mt-4 overflow-x-auto">
-              <table className="w-full text-left text-sm text-slate-600">
-                <thead>
-                  <tr className="text-xs uppercase text-slate-500">
-                    <th className="py-2">Category</th>
-                    <th className="py-2">Approvals</th>
-                    <th className="py-2">Denials</th>
-                    <th className="py-2">Approval Rate</th>
-                    <th className="py-2">Top Denial Reasons</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {policyInsights.categories.map((cat) => (
-                    <tr key={cat.category} className="border-t border-slate-100">
-                      <td className="py-2 font-medium text-slate-900">{cat.category}</td>
-                      <td className="py-2">{cat.approvals}</td>
-                      <td className="py-2">{cat.denials}</td>
-                      <td className="py-2">{Math.round(cat.approvalRate * 100)}%</td>
-                      <td className="py-2 text-xs text-slate-500">
-                        {cat.topReasons.length ? cat.topReasons.join("; ") : "—"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
               <InfoHint
                 label="Top AI-flagged"
                 text="Highest-priority individual requests surfaced by the AI (alignment score ≥ 80)."
@@ -414,6 +356,65 @@ export function DashboardPage() {
               <p className="mt-4 text-sm text-slate-500">AI needs a moment to flag high-priority requests.</p>
             )}
           </div>
+
+          {recommendations?.policyGreyAreas.length ? (
+            <div className="rounded-2xl bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-slate-900">Policy Grey Areas</h3>
+                <InfoHint
+                  label="Policy grey areas"
+                  text="AI highlights categories where approvals/denials are inconsistent and may need policy clarification."
+                />
+              </div>
+              <ul className="mt-3 space-y-3 text-sm text-slate-600">
+                {recommendations.policyGreyAreas.map((area) => (
+                  <li key={area.category} className="rounded-lg border border-slate-100 p-3">
+                    <p className="text-sm font-semibold text-slate-900">{area.category}</p>
+                    <p className="text-xs text-slate-500">{area.summary}</p>
+                    <p className="mt-1 text-xs text-slate-500">{area.suggestion}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {policyInsights && (
+            <div className="rounded-2xl bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-slate-900">Category Approval Trends</h3>
+                <InfoHint
+                  label="Category approval trends"
+                  text="Historical approvals vs denials help reviewers calibrate decisions by category."
+                />
+              </div>
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full text-left text-sm text-slate-600">
+                  <thead>
+                    <tr className="text-xs uppercase text-slate-500">
+                      <th className="py-2">Category</th>
+                      <th className="py-2">Approvals</th>
+                      <th className="py-2">Denials</th>
+                      <th className="py-2">Approval Rate</th>
+                      <th className="py-2">Top Denial Reasons</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {policyInsights.categories.map((cat) => (
+                      <tr key={cat.category} className="border-t border-slate-100">
+                        <td className="py-2 font-medium text-slate-900">{cat.category}</td>
+                        <td className="py-2">{cat.approvals}</td>
+                        <td className="py-2">{cat.denials}</td>
+                        <td className="py-2">{Math.round(cat.approvalRate * 100)}%</td>
+                        <td className="py-2 text-xs text-slate-500">
+                          {cat.topReasons.length ? cat.topReasons.join("; ") : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </section>
