@@ -1,0 +1,17 @@
+# Node
+node_modules
+*.log
+dist
+
+# Env
+.env*
+
+# Editor
+.DS_Store
+.idea
+.vscode
+
+# Build outputs
+client/dist
+server/dist
+
