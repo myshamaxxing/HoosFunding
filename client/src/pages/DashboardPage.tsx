@@ -93,33 +93,6 @@ export function DashboardPage() {
         </div>
       )}
 
-      {department && (
-        <div className="grid gap-4 rounded-2xl bg-white p-6 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <p className="text-xs uppercase text-slate-500">Department</p>
-            <p className="text-lg font-semibold text-slate-900">{department.departmentName}</p>
-          </div>
-          <div>
-            <p className="text-xs uppercase text-slate-500">Avg Resources Rating</p>
-            <p className="text-lg font-semibold text-slate-900">{department.avgResourcesRating.toFixed(1)} / 5</p>
-          </div>
-          <div>
-            <p className="text-xs uppercase text-slate-500">Avg Teaching Rating</p>
-            <p className="text-lg font-semibold text-slate-900">{department.avgTeachingRating.toFixed(1)} / 5</p>
-          </div>
-          <div>
-            <p className="text-xs uppercase text-slate-500">Top Themes</p>
-            <ul className="mt-1 space-y-1 text-sm text-slate-700">
-              {department.topThemes.slice(0, 2).map((theme) => (
-                <li key={theme.theme}>
-                  {theme.theme} <span className="text-slate-400">({theme.count})</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      )}
-
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between">
