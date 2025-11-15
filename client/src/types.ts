@@ -5,6 +5,7 @@ export type UserRole = "Student" | "Professor" | "Staff" | "Other";
 export interface FundingRequest {
   id: string;
   name: string;
+  email: string;
   role: UserRole;
   category: RequestCategory;
   title: string;

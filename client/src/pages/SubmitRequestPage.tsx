@@ -9,6 +9,7 @@ const urgencyOptions: Array<NewFundingRequest["urgency"]> = ["Low", "Medium", "H
 
 const defaultForm: NewFundingRequest = {
   name: "",
+  email: "",
   role: "Student",
   category: "Tech",
   title: "",
@@ -29,6 +30,12 @@ export function SubmitRequestPage() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setMessage(null);
+
+    if (!form.email.toLowerCase().endsWith("@virginia.edu")) {
+      setMessage("Please use a valid UVA email ending in @virginia.edu.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const created = await createRequest(form);
@@ -63,6 +70,18 @@ export function SubmitRequestPage() {
               value={form.name}
               onChange={(event) => handleChange("name", event.target.value)}
               required
+            />
+          </label>
+          <label className="text-sm font-medium text-slate-700">
+            UVA Email
+            <input
+              className={`${inputClass} mt-1`}
+              type="email"
+              placeholder="you@virginia.edu"
+              value={form.email}
+              onChange={(event) => handleChange("email", event.target.value)}
+              required
+              pattern=".+@virginia\\.edu"
             />
           </label>
           <label className="text-sm font-medium text-slate-700">

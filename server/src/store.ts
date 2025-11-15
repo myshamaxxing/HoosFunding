@@ -4,6 +4,7 @@ export const fundingRequests: FundingRequest[] = [
   {
     id: "req-1",
     name: "Jordan Alvarez",
+    email: "jra7fw@virginia.edu",
     role: "Student",
     category: "Tech",
     title: "Replace failing projector in Monroe 120",
@@ -15,6 +16,7 @@ export const fundingRequests: FundingRequest[] = [
   {
     id: "req-2",
     name: "Dr. Priya Raman",
+    email: "prr3@virginia.edu",
     role: "Professor",
     category: "Staffing",
     title: "Additional TA for ECON 2010",
