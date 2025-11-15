@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Pie, PieChart, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
-import { fetchDepartmentSummary, fetchRecommendations, fetchRequests } from "../api";
+import { fetchPolicyInsights, fetchRecommendations, fetchRequests } from "../api";
 import type {
-  DepartmentSummary,
   FundingRequest,
   RecommendationResponse,
   RequestCategory,
+  PolicyInsightSummary,
 } from "../types";
 
 const categoryFilters: (RequestCategory | "All")[] = [
@@ -46,11 +46,16 @@ function InfoHint({ text, label }: { text: string; label: string }) {
   );
 }
 
+function extractPolicyCode(note: string): string | undefined {
+  const match = note.match(/\[(?<code>FIN-\d+|EXT-\d+|Budget[^\]]+)\]/);
+  return match?.groups?.code;
+}
+
 export function DashboardPage() {
   const [requests, setRequests] = useState<FundingRequest[]>([]);
-  const [department, setDepartment] = useState<DepartmentSummary | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<RequestCategory | "All">("All");
   const [recommendations, setRecommendations] = useState<RecommendationResponse | null>(null);
+  const [policyInsights, setPolicyInsights] = useState<PolicyInsightSummary | null>(null);
   const [loadingRecommendations, setLoadingRecommendations] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,12 +63,9 @@ export function DashboardPage() {
     async function bootstrap() {
       try {
         setError(null);
-        const [summaryData, requestData] = await Promise.all([
-          fetchDepartmentSummary(),
-          fetchRequests(),
-        ]);
-        setDepartment(summaryData);
+        const [requestData, insights] = await Promise.all([fetchRequests(), fetchPolicyInsights()]);
         setRequests(requestData);
+        setPolicyInsights(insights);
         await generateRecommendations();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load data.");
@@ -112,9 +114,18 @@ export function DashboardPage() {
 
   const rankedHintsById = useMemo(() => {
     if (!recommendations) return {};
-    const map: Record<string, string | undefined> = {};
+    const map: Record<
+      string,
+      { hint?: string; policyCode?: string; viability: string; alignmentScore: number }
+    > = {};
     recommendations.rankedRequests.forEach((ranked) => {
-      map[ranked.id] = ranked.pastDenialHint;
+      const note = ranked.policyNote ?? ranked.pastDenialHint;
+      map[ranked.id] = {
+        hint: note,
+        policyCode: note ? extractPolicyCode(note) : undefined,
+        viability: ranked.viability,
+        alignmentScore: ranked.alignmentScore,
+      };
     });
     return map;
   }, [recommendations]);
@@ -124,42 +135,6 @@ export function DashboardPage() {
       {error && (
         <div className="rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
-        </div>
-      )}
-
-      {department && (
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
-          <div className="flex flex-wrap items-center gap-6">
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="text-xs uppercase text-slate-500">Department</p>
-                <InfoHint label="Department" text="Context for the requests currently under review." />
-              </div>
-              <p className="text-lg font-semibold text-slate-900">{department.departmentName}</p>
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="text-xs uppercase text-slate-500">Top Themes</p>
-                <InfoHint label="Top themes" text="Highlights from recent evaluations and feedback." />
-              </div>
-              <p className="text-sm text-slate-700">
-                {department.topThemes
-                  .slice(0, 2)
-                  .map((theme) => `${theme.theme} (${theme.count})`)
-                  .join(" • ")}
-              </p>
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <p className="text-xs uppercase text-slate-500">Student Voice</p>
-                <InfoHint
-                  label="Student voice"
-                  text="Recent quote highlighting the impact of funding decisions."
-                />
-              </div>
-              <p className="text-sm text-slate-600">“{department.sampleComments[0]}”</p>
-            </div>
-          </div>
         </div>
       )}
 
@@ -194,28 +169,50 @@ export function DashboardPage() {
                 No requests match this filter yet.
               </p>
             ) : (
-              filteredRequests.map((request) => (
-                <article key={request.id} className="rounded-xl border border-slate-100 p-4 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-slate-900">{request.title}</p>
-                    <span
-                      className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600"
-                      aria-label={`Category ${request.category}`}
-                    >
-                      {request.category}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-500">
-                    {request.role} • Urgency: <span className="font-medium text-slate-700">{request.urgency}</span>
-                  </p>
-                  <p className="mt-2 text-sm text-slate-600">{request.description}</p>
-                  {rankedHintsById[request.id] && (
-                    <p className="mt-3 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-                      <span className="font-semibold">AI Policy Insight:</span> {rankedHintsById[request.id]}
+              filteredRequests.map((request) => {
+                const insight = rankedHintsById[request.id];
+                return (
+                  <article key={request.id} className="rounded-xl border border-slate-100 p-4 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">{request.title}</p>
+                        <p className="text-xs text-slate-500">{request.role}</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                          {request.category}
+                        </span>
+                        {insight && (
+                          <span
+                            className={`ml-2 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                              insight.viability === "Likely"
+                                ? "bg-emerald-100 text-emerald-700"
+                                : insight.viability === "Needs Review"
+                                  ? "bg-amber-100 text-amber-700"
+                                  : "bg-red-100 text-red-700"
+                            }`}
+                          >
+                            {insight.viability}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-xs text-slate-500">
+                      Urgency: <span className="font-medium text-slate-700">{request.urgency}</span>
+                      {insight ? ` • Alignment ${insight.alignmentScore}` : ""}
                     </p>
-                  )}
-                </article>
-              ))
+                    <p className="mt-2 text-sm text-slate-600">{request.description}</p>
+                    {insight?.hint && (
+                      <p className="mt-3 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                        <span className="font-semibold">AI Policy Insight:</span> {insight.hint}
+                        {insight.policyCode && (
+                          <span className="ml-1 text-[10px] uppercase tracking-wide">({insight.policyCode})</span>
+                        )}
+                      </p>
+                    )}
+                  </article>
+                );
+              })
             )}
           </div>
         </div>
@@ -328,6 +325,64 @@ export function DashboardPage() {
           <div className="rounded-2xl bg-white p-6 shadow-sm">
             <div className="flex items-center gap-2">
               <h3 className="text-lg font-semibold text-slate-900">Top AI-Flagged Requests</h3>
+        {recommendations?.policyGreyAreas.length ? (
+          <div className="rounded-2xl bg-white p-6 shadow-sm">
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-slate-900">Policy Grey Areas</h3>
+              <InfoHint
+                label="Policy grey areas"
+                text="AI highlights categories where approvals/denials are inconsistent and may need policy clarification."
+              />
+            </div>
+            <ul className="mt-3 space-y-3 text-sm text-slate-600">
+              {recommendations.policyGreyAreas.map((area) => (
+                <li key={area.category} className="rounded-lg border border-slate-100 p-3">
+                  <p className="text-sm font-semibold text-slate-900">{area.category}</p>
+                  <p className="text-xs text-slate-500">{area.summary}</p>
+                  <p className="mt-1 text-xs text-slate-500">{area.suggestion}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {policyInsights && (
+          <div className="rounded-2xl bg-white p-6 shadow-sm">
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-slate-900">Category Approval Trends</h3>
+              <InfoHint
+                label="Category approval trends"
+                text="Historical approvals vs denials help reviewers calibrate decisions by category."
+              />
+            </div>
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full text-left text-sm text-slate-600">
+                <thead>
+                  <tr className="text-xs uppercase text-slate-500">
+                    <th className="py-2">Category</th>
+                    <th className="py-2">Approvals</th>
+                    <th className="py-2">Denials</th>
+                    <th className="py-2">Approval Rate</th>
+                    <th className="py-2">Top Denial Reasons</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {policyInsights.categories.map((cat) => (
+                    <tr key={cat.category} className="border-t border-slate-100">
+                      <td className="py-2 font-medium text-slate-900">{cat.category}</td>
+                      <td className="py-2">{cat.approvals}</td>
+                      <td className="py-2">{cat.denials}</td>
+                      <td className="py-2">{Math.round(cat.approvalRate * 100)}%</td>
+                      <td className="py-2 text-xs text-slate-500">
+                        {cat.topReasons.length ? cat.topReasons.join("; ") : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
               <InfoHint
                 label="Top AI-flagged"
                 text="Highest-priority individual requests surfaced by the AI (alignment score ≥ 80)."

@@ -4,6 +4,7 @@ import type {
   NewFundingRequest,
   RecommendationResponse,
   RequestCategory,
+  PolicyInsightSummary,
 } from "./types";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000/api";
@@ -53,5 +54,10 @@ export async function precheckRequest(input: {
     body: JSON.stringify(input),
   });
   return handleResponse<{ preCheckMessage: string; commonDenialReasons: string[] }>(response);
+}
+
+export async function fetchPolicyInsights(): Promise<PolicyInsightSummary> {
+  const response = await fetch(`${API_BASE}/policy-insights`);
+  return handleResponse<PolicyInsightSummary>(response);
 }
 

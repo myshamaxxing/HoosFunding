@@ -37,11 +37,16 @@ export interface DepartmentSummary {
   sampleComments: string[];
 }
 
+export type ViabilityStatus = "Likely" | "Risky" | "Needs Review";
+
 export interface RankedRequest {
   id: string;
   priorityRank: number;
   alignmentScore: number;
   reasoning: string;
+  pastDenialHint?: string | undefined;
+  viability: ViabilityStatus;
+  policyNote?: string | undefined;
 }
 
 export interface Recommendation {
@@ -50,10 +55,30 @@ export interface Recommendation {
   rationale: string;
 }
 
+export interface PolicyGreyArea {
+  category: RequestCategory;
+  summary: string;
+  suggestion: string;
+}
+
 export interface RecommendationResponse {
   recommendations: Recommendation[];
   rankedRequests: RankedRequest[];
+  policyGreyAreas: PolicyGreyArea[];
 }
 
 export type NewFundingRequest = Omit<FundingRequest, "id" | "status" | "createdAt">;
+
+export interface CategoryInsight {
+  category: RequestCategory;
+  approvals: number;
+  denials: number;
+  approvalRate: number;
+  topReasons: string[];
+}
+
+export interface PolicyInsightSummary {
+  categories: CategoryInsight[];
+  frequentGreyAreas: PolicyGreyArea[];
+}
 

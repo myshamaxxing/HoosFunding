@@ -8,6 +8,7 @@ import { departmentSummary } from "./departmentSummary";
 import { fundingRequests } from "./store";
 import type { FundingRequest } from "./types";
 import { buildPreCheckMessage, getCommonDenialMessagesForCategory } from "./policyCategories";
+import { buildPolicyInsights } from "./policyInsights";
 
 dotenv.config();
 
@@ -85,6 +86,11 @@ app.post("/api/precheck-request", (req: Request, res: Response) => {
     preCheckMessage: message,
     commonDenialReasons: reasons,
   });
+});
+
+app.get("/api/policy-insights", (_req: Request, res: Response) => {
+  const insights = buildPolicyInsights();
+  res.json(insights);
 });
 
 app.use((_req, res) => {
