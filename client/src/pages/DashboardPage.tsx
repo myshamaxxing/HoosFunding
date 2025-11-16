@@ -15,6 +15,7 @@ export function DashboardPage() {
   const [recommendations, setRecommendations] = useState<RecommendationResponse | null>(null);
   const [loadingRecommendations, setLoadingRecommendations] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const adminName = import.meta.env.VITE_ADMIN_NAME ?? "Admin";
 
   useEffect(() => {
     async function bootstrap() {
@@ -73,6 +74,20 @@ export function DashboardPage() {
           {error}
         </div>
       )}
+
+      <div className="overflow-hidden rounded-3xl bg-gradient-to-r from-blue-900 via-blue-800 to-blue-600 p-8 text-white shadow-lg">
+        <div className="flex flex-col gap-4 text-center">
+          <p className="text-xs uppercase tracking-[0.3em] text-blue-200">Welcome</p>
+          <h2 className="text-4xl font-semibold leading-tight text-white">Hello, {adminName}</h2>
+          <p className="text-lg font-medium text-blue-100">Funding Management Portal</p>
+          <div className="mt-2 inline-flex flex-col self-center rounded-2xl border border-white/20 bg-white/10 px-6 py-4 text-left">
+            <span className="text-xs uppercase tracking-wide text-blue-100">Pending in queue</span>
+            <span className="text-3xl font-semibold text-white">
+              {requests.filter((req) => req.status === "Pending").length}
+            </span>
+          </div>
+        </div>
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
@@ -139,8 +154,8 @@ export function DashboardPage() {
                     </p>
                     <p className="mt-2 text-sm text-slate-600">{request.description}</p>
                     {insight?.hint && (
-                      <p className="mt-3 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-                        <span className="font-semibold">AI Policy Insight:</span> {insight.hint}
+                      <p className="mt-3 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-900">
+                        {insight.hint}
                         {insight.policyCode && (
                           <span className="ml-1 text-[10px] uppercase tracking-wide">({insight.policyCode})</span>
                         )}

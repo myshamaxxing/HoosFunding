@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import brandImage from "../assets/Screenshot 2025-11-15 at 6.55.39 PM.png";
 
 type Tab = "admin" | "requestee" | "stats" | "submit";
 
@@ -21,9 +22,13 @@ export const Header: FC<HeaderProps> = ({ activeTab, onTabChange }) => {
   return (
     <header className="bg-white shadow-sm">
       <div className="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm uppercase tracking-wide text-primary-light">HoosFunding</p>
-          <h1 className="text-2xl font-semibold text-slate-900">Department Resource Portal</h1>
+        <div className="flex items-center">
+          <img
+            src={brandImage}
+            alt="Hoos Funding logo"
+            className="h-16 w-auto object-contain"
+          />
+          <span className="sr-only">HoosFunding Department Resource Portal</span>
         </div>
         <nav className="flex gap-4 rounded-full bg-slate-100 p-2">
           <div className="flex gap-2 rounded-full border border-slate-200 bg-white/90 px-2 py-1 shadow-sm">
