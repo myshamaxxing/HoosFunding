@@ -250,47 +250,26 @@ export function StatisticsPage() {
             </div>
           )}
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-2xl bg-white p-6 shadow-sm">
-              <div className="flex items-center gap-2">
-                <h3 className="text-lg font-semibold text-slate-900">AI Model & Training Notes</h3>
-                <InfoHint
-                  label="Model training"
-                  text="Summarizes the heuristics currently powering aiService.ts."
-                />
-              </div>
-              <p className="mt-2 text-sm text-slate-600">
-                The current model is a rules-based scaffold ready for an LLM callout. It blends policy metadata with past
-                decisions to emulate a reviewer. Here is the exact training corpus:
-              </p>
-              <ul className="mt-4 space-y-3 text-sm text-slate-600">
-                {modelInputs.map((input) => (
-                  <li key={input.title} className="rounded-xl border border-slate-100 p-3">
-                    <p className="text-sm font-semibold text-slate-900">{input.title}</p>
-                    <p className="text-xs text-slate-500">{input.detail}</p>
-                  </li>
-                ))}
-              </ul>
+          <div className="rounded-2xl bg-white p-6 shadow-sm">
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-slate-900">AI Model & Training Notes</h3>
+              <InfoHint
+                label="Model training"
+                text="Summarizes the heuristics currently powering aiService.ts."
+              />
             </div>
-
-            <div className="rounded-2xl bg-white p-6 shadow-sm">
-              <div className="flex items-center gap-2">
-                <h3 className="text-lg font-semibold text-slate-900">Deployment Checklist</h3>
-                <InfoHint label="Deployment" text="Steps to move the mock stack into hosting environments." />
-              </div>
-              <ul className="mt-3 space-y-2 text-sm text-slate-600">
-                {deploymentSteps.map((step, index) => (
-                  <li key={step} className="flex items-start gap-2">
-                    <span className="text-xs font-semibold text-primary">{index + 1}.</span>
-                    <p className="text-xs text-slate-500">{step}</p>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-4 text-xs text-slate-500">
-                When you swap in a hosted LLM endpoint, update the environment variables referenced inside
-                server/src/aiService.ts and rebuild the client so VITE_API_BASE_URL points to the deployed API.
-              </p>
-            </div>
+            <p className="mt-2 text-sm text-slate-600">
+              The current model is a rules-based scaffold ready for an LLM callout. It blends policy metadata with past
+              decisions to emulate a reviewer. Here is the exact training corpus:
+            </p>
+            <ul className="mt-4 space-y-3 text-sm text-slate-600">
+              {modelInputs.map((input) => (
+                <li key={input.title} className="rounded-xl border border-slate-100 p-3">
+                  <p className="text-sm font-semibold text-slate-900">{input.title}</p>
+                  <p className="text-xs text-slate-500">{input.detail}</p>
+                </li>
+              ))}
+            </ul>
           </div>
         </>
       )}
