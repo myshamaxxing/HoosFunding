@@ -94,6 +94,10 @@ export function SubmitRequestPage() {
 
   return (
     <section className="mx-auto max-w-3xl space-y-8 px-6 py-10">
+      <h1 className="text-2xl font-bold text-slate-900">
+        Hello Andy, {" "}
+        <span className="text-slate-500 text-xl font-normal">(Student)</span>
+      </h1>
       <div>
         <h2 className="text-2xl font-semibold text-slate-900">Submit a Funding Request</h2>
         <p className="mt-2 text-sm text-slate-600">

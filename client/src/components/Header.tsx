@@ -13,7 +13,7 @@ const adminTabs: { label: string; value: Tab }[] = [
 ];
 
 const requestTabs: { label: string; value: Tab }[] = [
-  { label: "Requestee Dashboard", value: "requestee" },
+  { label: "Requester Dashboard", value: "requestee" },
   { label: "Submit Request", value: "submit" },
 ];
 

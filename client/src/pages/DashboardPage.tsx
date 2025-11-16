@@ -68,6 +68,7 @@ export function DashboardPage() {
 
   return (
     <section className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+       <h1 className="text-2xl font-bold text-slate-900">Hello Admin,</h1>
       {error && (
         <div className="rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
